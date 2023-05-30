@@ -106,3 +106,26 @@ class Cart(models.Model):
         return self.username
 
 
+class Information(models.Model):
+    address = models.CharField(max_length=500)
+    email = models.EmailField(max_length=300)
+    phone = models.CharField(max_length=20)
+
+
+    def __str__(self):
+        return self.address
+
+
+# class Order(models.Model):
+#     firstname = models.CharField(max_length=100)
+#     lastname = models.CharField(max_length=100)
+#     email = models.EmailField(max_length=100)
+#     mobile_no = models.IntegerField()
+#     address = models.TextField()
+#     country = models.CharField(max_length=100)
+#     city = models.CharField(max_length=100)
+#     state = models.CharField(max_length=100)
+#     zip_code = models.IntegerField()
+#     amount = models.IntegerField()
+
+

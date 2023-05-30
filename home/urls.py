@@ -8,7 +8,11 @@ urlpatterns = [
     path('product/<slug>', ProductDetailView.as_view(), name='product'),
     path('search', SearchView.as_view(), name='search'),
     path('product_review/<slug>', productReview, name='product_review'),
+    path('cart', CartView.as_view(), name='cart'),
     path('signup', signup, name='signup'),
     path('add_to_cart/<slug>', add_to_cart, name='add_to_cart'),
+    path('delete_cart/<slug>', delete_cart, name='delete_cart'),
+    path('reduce_cart/<slug>', reduce_cart, name='reduce_cart'),
+    path('checkout/', check_out, name='check_out'),
 
 ]

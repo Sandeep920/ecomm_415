@@ -6,6 +6,12 @@ from django.contrib.auth.models import User
 # Create your views here.
 
 
+def count_cart(request):
+    username = request.user.username
+    cart_number = Cart.objects.filter( username=username, checkout=False).count()
+    return cart_number
+
+
 class Base(View):
     views = {}
     views['categories'] = Category.objects.all()
@@ -14,16 +20,19 @@ class Base(View):
 class HomeView(Base):
     def get(self,request):
         self.views
+        self.views['cart_no'] = count_cart(request)
         self.views['ads'] = Ad.objects.all()
         self.views['sliders'] = Slider.objects.all()
         self.views['hots'] = Product.objects.filter(labels = 'hot')
         self.views['news'] = Product.objects.filter(labels='new')
         self.views['sale'] = Product.objects.filter(labels='sale')
+        self.views['informations'] = Information.objects.all()
         return render(request,'index.html',self.views)
 
 class CategoryView(Base):
     def get(self,request,slug):
         self.views
+        self.views['cart_no'] = count_cart(request)
         ids = Category.objects.get(slug = slug).id
         self.views['product_category'] = Product.objects.filter(category_id = ids)
 
@@ -40,6 +49,7 @@ class BrandView(Base):
 class ProductDetailView(Base):
     def get(self,request,slug):
         self.views
+        self.views['cart_no'] = count_cart(request)
         self.views['product_detail'] = Product.objects.filter(slug = slug)
         self.views['product_review'] = ProductReview.objects.filter(slug=slug)
 
@@ -49,6 +59,7 @@ class ProductDetailView(Base):
 class SearchView(Base):
     def get(self,request):
         self.views
+        self.views['cart_no'] = count_cart(request)
         query = request.GET.get('query')
         if query !='':
             self.views['search_product'] = Product.objects.filter(name__icontains = query)
@@ -105,6 +116,23 @@ def signup(request):
 
     return render(request,'signup.html')
 
+class CartView(Base):
+    def get(self,request):
+        self.views
+        self.views['cart_no'] = count_cart(request)
+        username = request.user.username
+        cart_info = Cart.objects.filter(username = username,checkout = False)
+        self.views['cart_product'] = cart_info
+        all_total = 0
+        for i in cart_info:
+            print(i)
+            all_total = all_total + i.total
+            self.views['all_total'] = all_total
+            self.views['shipping'] = 50
+            self.views['grand_total'] = all_total + self.views['shipping']
+
+
+        return render(request,'cart.html',self.views)
 
 def add_to_cart(request,slug):
     username = request.user.username
@@ -119,7 +147,7 @@ def add_to_cart(request,slug):
         quantity = quantity + 1
         total = quantity * original_price
         Cart.objects.filter(slug=slug, username=username, checkout=False).update(total=total, quantity=quantity)
-        return redirect('/')
+        return redirect('/cart')
     else:
         price = Product.objects.get(slug=slug).price
         discounted_price = Product.objects.get(slug=slug).discounted_price
@@ -134,6 +162,38 @@ def add_to_cart(request,slug):
             total=total
         )
         data.save()
-        return redirect('/')
+        return redirect('/cart')
+
+def delete_cart(request,slug):
+    username = request.user.username
+    Cart.objects.filter(slug=slug, username=username, checkout=False).delete()
+    return redirect('/cart')
+
+
+def reduce_cart(request,slug):
+    username = request.user.username
+    if Cart.objects.filter(slug=slug, username=username, checkout=False).exists():
+        quantity = Cart.objects.get(slug=slug, username=username, checkout=False).quantity
+        price = Product.objects.get(slug=slug).price
+        discounted_price = Product.objects.get(slug=slug).discounted_price
+        if discounted_price > 0:
+            original_price = discounted_price
+        else:
+            original_price = price
+        if quantity > 1:
+            quantity = quantity - 1
+            total = quantity * original_price
+            Cart.objects.filter(slug=slug, username=username, checkout=False).update(total=total, quantity=quantity)
+            return redirect('/cart')
+        else:
+            messages.error(request, 'The quantity is already 1')
+            return redirect('/cart')
+
+
+def check_out(request):
+    return render(request,'checkout.html')
+
+
+
 
 
