@@ -192,9 +192,25 @@ def reduce_cart(request,slug):
 
 def check_out(request):
     views = {}
-    views[''] = Cart.objects.all()
+    views['username'] = request.user.username
+    views['email'] = request.user.email
 
-    return render(request,'checkout.html')
+    # username = request.user.username
+    # email = request.user.email
+    views['cart_no'] = count_cart(request)
+    username = request.user.username
+    cart_info = Cart.objects.filter(username = username,checkout = False)
+    views['cart_product'] = cart_info
+    all_total = 0
+    for i in cart_info:
+        print(i)
+        all_total = all_total + i.total
+        views['all_total'] = all_total
+        views['shipping'] = 50
+        views['grand_total'] = all_total + views['shipping']
+
+
+    return render(request,'checkout.html',views)
 
 
 
