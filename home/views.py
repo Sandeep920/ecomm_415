@@ -107,7 +107,7 @@ def signup(request):
                     first_name = f_name,
                     last_name = l_name,
                     password = password
-                )
+                ) 
                 user.save()
                 return redirect('/accounts/login')
         else:
@@ -191,6 +191,9 @@ def reduce_cart(request,slug):
 
 
 def check_out(request):
+    views = {}
+    views[''] = Cart.objects.all()
+
     return render(request,'checkout.html')
 
 
