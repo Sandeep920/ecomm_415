@@ -197,10 +197,10 @@ def check_out(request):
 
     # username = request.user.username
     # email = request.user.email
-    views['cart_no'] = count_cart(request)
+    # views['cart_no'] = count_cart(request)
     username = request.user.username
     cart_info = Cart.objects.filter(username = username,checkout = False)
-    views['cart_product'] = cart_info
+    # views['cart_product'] = cart_info
     all_total = 0
     for i in cart_info:
         print(i)
@@ -208,6 +208,7 @@ def check_out(request):
         views['all_total'] = all_total
         views['shipping'] = 50
         views['grand_total'] = all_total + views['shipping']
+        views['cart_product'] = cart_info
 
 
     return render(request,'checkout.html',views)
